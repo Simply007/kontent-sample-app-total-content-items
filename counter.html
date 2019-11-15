@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Kontent total items</title>
+</head>
+
+<body>
+  <h1>Kontent total items counter</h1>
+  <p>This tool shows how many content items are present in default language</p>
+  <div>
+    <label>ProjectId (sample project as default): </label>
+    <input id="project-id" type="text" maxlength="36" value="975bf280-fd91-488c-994c-2f04416e5ee3">
+  </div>
+  <div>
+    <label>Total count: </label>
+    <label id="total-items-count"></label>
+  </div>
+  <div>
+    <input id="submit-button" type="button" value="Count items">
+  </div>
+  <script>
+    document.querySelector('#submit-button').onclick = function countProjectCount() {
+      var projectId = document.querySelector('#project-id').value;
+      var resultLabel = document.querySelector('#total-items-count');
+      resultLabel.innerHTML = 'Loading...'
+      fetch(`https://deliver.kontent.ai/${projectId}/items/?includeTotalCount=true&elements=null&limit=1`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+        .then(response => response.json())
+        .then((body) => {
+          resultLabel.innerHTML = JSON.stringify(body.pagination.total_count);
+        }).catch((err) => {
+          resultLabel.innerHTML = 'Error - check console..'
+          console.log(err);
+        });
+    }
+  </script>
+</body>
+
+</html>
