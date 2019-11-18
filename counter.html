@@ -30,6 +30,7 @@
       fetch(`https://deliver.kontent.ai/${projectId}/items/?includeTotalCount=true&elements=null&limit=1`, {
         headers: {
           'Content-Type': 'application/json',
+          'X-KC-SOURCE': 'kontent-sample-app-total-content-items;1.0.0'
         }
       })
         .then(response => response.json())
