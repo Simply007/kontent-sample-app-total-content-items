@@ -4,7 +4,7 @@
 
 This tool is able to get the total items count from the [Kentico Kontent](https://kontent.ai) CaaS.
 
-![showcase](showcase.gif)
+![showcase](kk-showcase.gif)
 
 To use just go to the [https://Simply007.github.io/kontent-sample-app-total-content-items/counter.html](https://Simply007.github.io/kontent-sample-app-total-content-items/counter.html) and place you project ID and language code name from Kentico Kontent.
 
