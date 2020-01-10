@@ -6,37 +6,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Kontent total items</title>
+  <script type="text/javascript" src="https://unpkg.com/rxjs@6.4.0/bundles/rxjs.umd.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/@kentico/kontent-delivery/_bundles/kontent-delivery.browser.umd.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <style>
+    @media (max-width: 768px) {
+      .input-group-addon,
+      .input-group-btn,
+      .input-group .form-control {
+        display: block;
+        margin-bottom: 10px;
+        clear: both;
+      }
+
+      .input-group {
+        display: block;
+      }
+    }
+    </style>
 </head>
 
 <body>
-  <h1>Kontent total items counter</h1>
-  <p>This tool shows how many content items are present in default language</p>
-  <div>
-    <label>ProjectId (sample project as default): </label>
-    <input id="project-id" type="text" maxlength="36" value="975bf280-fd91-488c-994c-2f04416e5ee3">
+  <div class="container mt-5">
+    <img class="mb-3" width="300px" src="./kk-logo.png" alt="Kentico Kontent logo"/>
+    <h1>Kontent total items counter</h1>
+    <p>This tool shows how many content items are present in specified language</p>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">ProjectId (sample project as default)</span>
+      </div>
+      <input id="project-id" class="form-control" type="text" maxlength="36"
+        value="975bf280-fd91-488c-994c-2f04416e5ee3">
+    </div>
+    <div>
+      <div class="input-group mb-3">
+
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">Language codename</span>
+        </div>
+        <input id="language-codename" class="form-control" type="text" maxlength="25" value="en-US">
+      </div>
+    </div>
+    <div>
+      <button id="submit-button" class="btn btn-primary " type="button">Count items</button>
+    </div>
+    <div id="result" class="alert alert-primary my-3">
+      <label>Total count: </label>
+      <label id="total-items-count"></label>
+    </div>
   </div>
-  <div>
-    <label>Total count: </label>
-    <label id="total-items-count"></label>
-  </div>
-  <div>
-    <input id="submit-button" type="button" value="Count items">
-  </div>
+
   <script>
     document.querySelector('#submit-button').onclick = function countProjectCount() {
       var projectId = document.querySelector('#project-id').value;
+      var languageCodename = document.querySelector('#language-codename').value;
       var resultLabel = document.querySelector('#total-items-count');
+      var resultContainer = document.querySelector('#result');
       resultLabel.innerHTML = 'Loading...'
-      fetch(`https://deliver.kontent.ai/${projectId}/items/?includeTotalCount=true&elements=null&limit=1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-KC-SOURCE': 'kontent-sample-app-total-content-items;1.0.0'
-        }
-      })
-        .then(response => response.json())
-        .then((body) => {
-          resultLabel.innerHTML = JSON.stringify(body.pagination.total_count);
-        }).catch((err) => {
+
+      var Kc = window['kontentDelivery'];
+
+      var deliveryClient = new Kc.DeliveryClient({
+        projectId: projectId,
+        globalHeaders: () => [
+          {
+            header: 'X-KC-SOURCE',
+            value: 'kontent-sample-app-total-content-items;2.0.0'
+          }
+        ]
+      });
+
+      deliveryClient.itemsFeedAll()
+        .languageParameter(languageCodename)
+        .toPromise()
+        .then(response => {
+          var itemsLength = response.items.length;
+          var linkedItemsLength = Object.values(response.linkedItems).length;
+          resultLabel.innerHTML = `${itemsLength} (+${linkedItemsLength} components)`
+          if (itemsLength === 0) {
+            resultLabel.innerHTML = resultLabel.innerHTML + ' Did you set proper language codename?'
+            resultContainer.classList.remove('alert-success');
+            resultContainer.classList.add('alert-warning');
+          }
+          else {
+            resultContainer.classList.remove('alert-warning');
+            resultContainer.classList.add('alert-success');
+          }
+        })
+        .catch(err => {
           resultLabel.innerHTML = 'Error - check console..'
           console.log(err);
         });
