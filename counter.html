@@ -89,6 +89,7 @@
 
       deliveryClient.itemsFeedAll()
         .languageParameter(languageCodename)
+        .elementsParameter(['ěščřžýáíé'])
         .toPromise()
         .then(response => {
           var itemsLength = response.items.length;
