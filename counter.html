@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Kontent total items</title>
-  <script type="text/javascript" src="https://unpkg.com/rxjs@6.4.0/bundles/rxjs.umd.min.js"></script>
-  <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/@kentico/kontent-delivery/_bundles/kontent-delivery.browser.umd.min.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -75,27 +72,16 @@
       var resultContainer = document.querySelector('#result');
       resultLabel.innerHTML = 'Loading...'
 
-      var Kc = window['kontentDelivery'];
-
-      var deliveryClient = new Kc.DeliveryClient({
-        projectId: projectId,
-        globalHeaders: () => [
-          {
-            header: 'X-KC-SOURCE',
-            value: 'kontent-sample-app-total-content-items;2.0.0'
-          }
-        ]
-      });
-
-      deliveryClient.itemsFeedAll()
-        .languageParameter(languageCodename)
-        .elementsParameter(['ěščřžýáíé'])
-        .toPromise()
-        .then(response => {
-          var itemsLength = response.items.length;
-          var linkedItemsLength = Object.values(response.linkedItems).length;
-          resultLabel.innerHTML = `${itemsLength} (+${linkedItemsLength} components)`
-          if (itemsLength === 0) {
+      fetch(`https://deliver.kontent.ai/${projectId}/items/?includeTotalCount=true&elements=null&limit=1&language=${languageCodename}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-KC-SOURCE': 'kontent-sample-app-total-content-items;2.1.0'
+        }
+      })
+        .then(response => response.json())
+        .then((body) => {
+          resultLabel.innerHTML = JSON.stringify(body.pagination.total_count);
+          if (body.pagination.total_count === 0) {
             resultLabel.innerHTML = resultLabel.innerHTML + ' Did you set proper language codename?'
             resultContainer.classList.remove('alert-success');
             resultContainer.classList.add('alert-warning');
@@ -104,8 +90,7 @@
             resultContainer.classList.remove('alert-warning');
             resultContainer.classList.add('alert-success');
           }
-        })
-        .catch(err => {
+        }).catch((err) => {
           resultLabel.innerHTML = 'Error - check console..'
           console.log(err);
         });
