@@ -1,6 +1,6 @@
 # Kontent total items counter
 
-[![Live App](https://img.shields.io/badge/live-demo-brightgreen.svg)](https://Simply007.github.io/kontent-sample-app-total-content-items/counter.html)
+[![Live App](https://img.shields.io/badge/live-demo-brightgreen.svg)](https://ondrej.chrastina.dev/kontent-sample-app-total-content-items/counter.html)
 
 This tool is able to get the total items count from the [Kentico Kontent](https://kontent.ai) CaaS.
 
